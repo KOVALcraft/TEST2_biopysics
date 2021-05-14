@@ -1,6 +1,7 @@
 require('dotenv').config();
 const ImageData = require('../database/models/imageData')
 const Client = require('../database/models/roles/msgClient')
+const telegramClient = require('../database/models/roles/msgClientTg')
 
 //----------подключение к облачной монге------------------
 const mongoose = require('mongoose')
@@ -46,7 +47,7 @@ const readData = async (msg)=> {
 }
 
 
-//------------делаем проверку в базе на предмет подписчиков на рассылку------------------
+//------------делаем проверку в базе на предмет подписчиков Viber на рассылку------------------
 const checkRoleViber = async (source, profile, Role) => {
 
     let role = {}
@@ -75,17 +76,46 @@ const checkRoleViber = async (source, profile, Role) => {
     return role
 }
 
+//------------делаем проверку в базе на предмет подписчиков Telegram на рассылку------------------
+const checkRoleTelegram = async (source, ctx, Role) => {
+
+    let role = {}
+    if(source === 'telegram'){
+        role = await Role.findOne({idTelegram:ctx.from.id})
+        if(!role){
+            await Role.create({
+                source:'telegram',
+                idTelegram: ctx.from.id,
+                profileTelegram: {
+                    id: ctx.from.id,
+                    name: ctx.from.first_name,
+                    username: ctx.from.username,
+                    language: ctx.from.language_code,
+                    is_bot: ctx.from.is_bot
+                    },
+                state:{
+                    subscription:'null'
+                }
+            })
+            role = await Role.findOne({idTelegram:ctx.from.id})
+        }
+    }
+    console.log('save new client completed: ', role)
+    return role
+}
 
 module.exports = {
     connect,
     createData,
     readData,
     methods:{
-        checkRoleViber
+        checkRoleViber,
+        checkRoleTelegram
     },
     models:{
         roles:{
-            Client
+            Client,
+            telegramClient
         }
     }
 }

@@ -2,6 +2,8 @@ const socket = async ()=>{
 
 // const {connect, createData} = require('../database')
 const {viberClientBot} = require('../messengers/viber/index')
+const telegramClientBot = await require('../messengers/telegram/index').telegramClientBot()
+
 
 //----------проверка выборки данных из базы------------
 const {connect, readData} = require('../database')
@@ -9,6 +11,7 @@ const {connect, readData} = require('../database')
 const io = require('socket.io')(5000)
 
 const {Client} = require('../database/index').models.roles;
+const {telegramClient} = require('../database/index').models.roles
 
 
 const TextMessage = require('viber-bot').Message.Text
@@ -41,11 +44,19 @@ const start = async ()=>{
 				//-----------
 
 				const clients = await Client.find()
+				const clientsTg = await telegramClient.find()
+
 				// console.log(clients)
+				console.log(clientsTg)
+
 				clients.forEach(async client => {
 					await viberClientBot.sendMessage(client.profileViber, [
 						new TextMessage(`comment from client: ${msg.comment} for file with name: ${msg.name}`)
 					])
+				})
+
+				clientsTg.forEach(async (telegramClient) => {
+					await telegramClientBot.telegram.sendMessage(telegramClient.idTelegram,`comment from client: ${msg.comment} for file with name: ${msg.name}`)
 				})
 			})
 		})

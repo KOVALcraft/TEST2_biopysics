@@ -53,73 +53,21 @@ const telegram = async () => {
           ctx.reply("password confirmed!\n" + 'please click > "subscribe"');
           clientAdd.state.subscription = "PassOk";
           await clientAdd.save();
-          await idOwner.findOneAndUpdate(
-            { password: msg },
-            { $push: { telegram: clientAdd._id } }
-          );
+            await idOwner.findOneAndUpdate(
+              { password: msg },
+              { $push: { telegram: [clientAdd._id] } }
+            );
         } else {
           ctx.reply("sorry(( password not correct, try again!");
         }
 
         break;
     }
-
-    // if (clientAdd.state.subscription === "added") {
-    //   const log = ctx.message.text;
-    //   switch (ctx.message.text) {
-    //     case log:
-    //       const mailOk = await idOwner.findOne({ mail: log });
-    //       console.log("mailOK --------", mailOk);
-    //       if (mailOk) {
-    //         ctx.reply(
-    //           "email confirmed!\n" + "now enter and send bot your password"
-    //         );
-    //         clientAdd.state.subscription = "mailOk";
-    //         await clientAdd.save();
-    //       }
-    //       if (!mailOk) {
-    //         ctx.reply(
-    //           "sorry(( mail not correct, try again or subscribe if not subscribed!"
-    //         );
-    //       }
-    //       break;
-    //   }
-    //
-    //
-    // }
-    //
-    // if (clientAdd.state.subscription === "mailOk") {
-    //   console.log('if mailOk status: ', clientAdd.state.subscription)
-    //   const Pass = ctx.message.text;
-    //   switch (ctx.message.text) {
-    //     case Pass:
-    //       const passOk = await idOwner.findOne({ password: Pass });
-    //       console.log("passOK --------", passOk);
-    //       if (passOk) {
-    //         ctx.reply("password confirmed!\n" + 'please click > "subscribe"');
-    //         clientAdd.state.subscription = "PassOk";
-    //         await clientAdd.save();
-    //         console.log(clientAdd);
-    //         await idOwner.findOneAndUpdate(
-    //           { password: Pass },
-    //           { $push: { telegram: clientAdd._id } }
-    //         );
-    //       }
-    //       if (!passOk) {
-    //         ctx.reply("sorry(( password not correct, try again!");
-    //       }
-    //       break;
-    //   }
-    // }
   });
 
   await TgBot.launch();
 
   return TgBot;
-  // const start = async ()=>{
-  // await TgBot.launch()
-  // }
-  // start()
 };
 
 module.exports = {

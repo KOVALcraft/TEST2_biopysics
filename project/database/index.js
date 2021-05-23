@@ -101,7 +101,7 @@ const checkRoleTelegram = async (source, ctx, Role) => {
             role = await Role.findOne({idTelegram:ctx.from.id})
         }
     }
-    console.log('save new client completed: ', role)
+    // console.log('save new client completed: ', role)
     return role
 }
 

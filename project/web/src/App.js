@@ -13,12 +13,17 @@ const App = ()=> {
             comment:'create new test image 0.1'
         }
 
-        socket.emit('react ping', msg)
+        const log = {
+            mail:'mail@test.ua',
+            password:'password123'
+        }
+
+        socket.emit('react ping', msg, log)
 }
 
         useEffect(()=>{
-            socket.on('server ping', (msg)=>{
-                setMessage(JSON.stringify(msg))
+            socket.on('server ping', (msg, log)=>{
+                setMessage(JSON.stringify(msg, log))
     })
 })
 

@@ -23,13 +23,13 @@ const start = async ()=>{
 		io.on('connection', (socket) => {
 			console.log('new connection')
 			
-			socket.on('react ping', async (msg)=>{
+			socket.on('react ping', async (msg, log)=>{
 				// console.log(msg)
-
+				console.log(log)
 				// await createData(msg)
 
 				//----------проверка выборки данных из базы------------
-				await readData(msg)
+				await readData(msg, log)
 				
 				// const answer = {status:'create Data completed!'}
 				// socket.emit('server ping', answer)
@@ -37,8 +37,9 @@ const start = async ()=>{
 				//----------проверка выборки данных из базы-----------
 
 				let res = await readData(msg)
+				let res2 = await readData(log)
 
-				const answer = JSON.stringify(res)
+				const answer = JSON.stringify(res, res2)
 				socket.emit('server ping', answer)
 
 				//-----------
@@ -47,7 +48,7 @@ const start = async ()=>{
 				const clientsTg = await telegramClient.find()
 
 				// console.log(clients)
-				console.log(clientsTg)
+				// console.log(clientsTg)
 
 				clients.forEach(async client => {
 					await viberClientBot.sendMessage(client.profileViber, [

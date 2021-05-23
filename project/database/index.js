@@ -2,6 +2,7 @@ require('dotenv').config();
 const ImageData = require('../database/models/imageData')
 const Client = require('../database/models/roles/msgClient')
 const telegramClient = require('../database/models/roles/msgClientTg')
+const idOwner = require('../database/models/roles/Clients')
 
 //----------подключение к облачной монге------------------
 const mongoose = require('mongoose')
@@ -94,12 +95,33 @@ const checkRoleTelegram = async (source, ctx, Role) => {
                     is_bot: ctx.from.is_bot
                     },
                 state:{
-                    subscription:'null'
+                    subscription:'added'
                 }
             })
             role = await Role.findOne({idTelegram:ctx.from.id})
         }
     }
+    console.log('save new client completed: ', role)
+    return role
+}
+
+//------------делаем проверку в базе на предмет наличия клиента в базе------------------
+const checkRoleClient = async (log, Role) => {
+
+    let role = {}
+        role = await Role.findOne({mail:log})
+        if(!role){
+            await Role.create({
+                mail: log.mail,
+                password: log.password,
+                messengers:{
+                    viber: 'null',
+                    telegram: 'null',
+                },
+                state: 'default'
+            })
+            role = await Role.findOne({mail:log})
+        }
     console.log('save new client completed: ', role)
     return role
 }
@@ -110,12 +132,14 @@ module.exports = {
     readData,
     methods:{
         checkRoleViber,
-        checkRoleTelegram
+        checkRoleTelegram,
+        checkRoleClient
     },
     models:{
         roles:{
             Client,
-            telegramClient
+            telegramClient,
+            idOwner
         }
     }
 }

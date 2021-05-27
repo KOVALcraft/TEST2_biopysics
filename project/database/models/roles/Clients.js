@@ -1,18 +1,9 @@
 const { model, Schema, Types } = require("mongoose");
 const schema = new Schema({
-  mail: { type: String },
-  password: { type: String },
-  viber: [{ type: Types.ObjectId, ref: "Client" }],
-  telegram: [{ type: Types.ObjectId, ref: "telegramClient" }],
-  state: {
-    subscription: {
-      type: String,
-    },
-  },
-  dateOfSigned: {
-    type: Date,
-    default: Date.now,
-  },
+  dateOfSigned: { type: Date, default: Date.now },
+  login: { type: Types.ObjectId, ref: "login" },
+  connectedSrv: { type: Types.ObjectId, ref: "connectedSrv" },
+  imageData: { type: Types.ObjectId, ref: "imageData" },
 });
 
-module.exports = model("idOwner", schema);
+module.exports = model("clientOwner", schema);

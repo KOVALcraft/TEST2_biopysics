@@ -3,12 +3,11 @@ require("dotenv").config();
 const telegram = async () => {
   const { Telegraf } = require("telegraf");
 
-  const keyboard = require("./keyboard/keyboardTelegram").keyboard;
-
+  const { clientOwner } = require("../../database/index").models.roles;
   const { telegramClient } = require("../../database/index").models.roles;
-  const { idOwner } = require("../../database/index").models.roles;
+  const { connectedSrv } = require("../../database/index").models.elements;
+  const { Login } = require("../../database/index").models.elements;
   const { checkRoleTelegram } = require("../../database/index").methods;
-  const { checkRoleClient } = require("../../database/index").methods;
 
   const TgBot = new Telegraf(process.env.TELEGRAM_CLIENT_BOT_TOKEN);
 
@@ -19,9 +18,17 @@ const telegram = async () => {
 
     await ctx.reply(
       "Hi, this is the TEST BIB-bot\n" +
-        "before you start using the bot, log in\n" +
-        "please enter and send bot your mail"
+        "before you start using the bot, login 🔒\n" +
+        "\n" +
+        "First step❗️\n" +
+        "📩 please send bot your mail... 📩"
     );
+    await ctx.replyWithMediaGroup([
+      {
+        media: { source: "./media/log.gif" },
+        type: "video",
+      },
+    ]);
   });
 
   TgBot.on("message", async (ctx) => {
@@ -32,31 +39,39 @@ const telegram = async () => {
 
     switch (clientStatus) {
       case "added":
-        const mailOk = await idOwner.findOne({ mail: msg });
+        const mailOk = await Login.findOne({ mail: msg });
         if (!!mailOk) {
           ctx.reply(
-            "email confirmed!\n" + "now enter and send bot your password"
+            "email 📩 confirmed!\n" +
+              "Next step❗️\n" +
+              "now please send bot your password 🔐"
           );
           clientAdd.state.subscription = "mailOk";
           await clientAdd.save();
         } else {
           ctx.reply(
-            "sorry(( mail not correct, try again or subscribe if not subscribed!"
+            "sorry(( mail is not correct, try again or subscribe if not subscribed!"
           );
         }
 
         break;
 
       case "mailOk":
-        const passOk = await idOwner.findOne({ password: msg });
+        const passOk = await Login.findOne({ password: msg });
         if (!!passOk) {
-          ctx.reply("password confirmed!\n" + 'please click > "subscribe"');
+          ctx.reply(
+            "password confirmed!\n" +
+              "You entered your account 🔓\n" +
+              "now you can receive notifications 📲"
+          );
           clientAdd.state.subscription = "PassOk";
+          const Owner = await clientOwner.findOne({ _id: passOk.clientId });
+          console.log(clientAdd)
           await clientAdd.save();
-            await idOwner.findOneAndUpdate(
-              { password: msg },
-              { $push: { telegram: [clientAdd._id] } }
-            );
+          await connectedSrv.findOneAndUpdate(
+            { clientId: Owner._id },
+            { $push: { telegram: [clientAdd._id] } }
+          );
         } else {
           ctx.reply("sorry(( password not correct, try again!");
         }

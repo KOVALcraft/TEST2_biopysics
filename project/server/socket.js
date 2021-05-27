@@ -1,12 +1,11 @@
 const socket = async ()=>{
 
-// const {connect, createData} = require('../database')
 const {viberClientBot} = require('../messengers/viber/index')
 const telegramClientBot = await require('../messengers/telegram/index').telegramClientBot()
 
 
 //----------проверка выборки данных из базы------------
-const {connect, readData} = require('../database')
+const {connect, createData, readData, createClient} = require('../database')
 
 const io = require('socket.io')(5000)
 
@@ -24,23 +23,26 @@ const start = async ()=>{
 			console.log('new connection')
 			
 			socket.on('react ping', async (msg, log)=>{
-				// console.log(msg)
+				console.log(msg)
 				console.log(log)
-				// await createData(msg)
 
-				//----------проверка выборки данных из базы------------
+
+				//----------чтение и запись данных из/в базу------------
+				// await createData(msg)
 				await readData(msg, log)
-				
-				// const answer = {status:'create Data completed!'}
-				// socket.emit('server ping', answer)
+
+				// const answerCreate = {status:'create Data completed!'}
+				// socket.emit('server ping', answerCreate)
 
 				//----------проверка выборки данных из базы-----------
 
 				let res = await readData(msg)
 				let res2 = await readData(log)
 
-				const answer = JSON.stringify(res, res2)
-				socket.emit('server ping', answer)
+				await createClient(log)
+
+				const answerRead = JSON.stringify(res, res2)
+				socket.emit('server ping', answerRead)
 
 				//-----------
 

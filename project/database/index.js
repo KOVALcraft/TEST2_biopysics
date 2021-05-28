@@ -1,5 +1,5 @@
 require("dotenv").config();
-const ImageData = require("../database/models/imageData");
+const ImageData = require("../database/models/dataElements/imageData");
 const Client = require("../database/models/roles/msgClient");
 const telegramClient = require("../database/models/roles/msgClientTg");
 const clientOwner = require("../database/models/roles/Clients");
@@ -25,14 +25,81 @@ const connect = async () => {
   }
 };
 
-//-------------сохранение данных в базу---------------------
-const createData = async (msg) => {
-  try {
-    await ImageData.create({
-      name: JSON.stringify(msg.name),
-      comment: JSON.stringify(msg.comment),
+//------------сохраняем в базе нового клиента + доп параметры------------------
+const createClient = async (log) => {
+  ////////////////////////////////////////////step #1
+  let loginOk = {};
+  loginOk = await Login.findOne({ login: log.mail });
+  if (!loginOk) {
+    await Login.create({
+      login: log.mail,
+      password: log.password,
     });
+    loginOk = await Login.findOne({ login: log.mail });
+  }
+
+  /////////////////////////////////////////////step #2
+  let newClient = {};
+  newClient = await clientOwner.findOne({ login: loginOk._id });
+  if (!newClient) {
+    await clientOwner.create({
+      login: loginOk._id,
+    });
+    newClient = await clientOwner.findOne({ login: loginOk._id });
+  }
+
+  /////////////////////////////////////////////step #3
+  await loginOk.updateOne({
+    $set: {
+      clientId: newClient._id,
+    },
+  });
+
+  ////////////////////////////////////////////step #4
+  let ConnectedSrv = {};
+  ConnectedSrv = await connectedSrv.findOne({ clientId: newClient._id });
+  if (!!newClient && !ConnectedSrv) {
+    await connectedSrv.create({
+      clientId: newClient._id,
+    });
+    ConnectedSrv = await connectedSrv.findOne({ clientId: newClient._id });
+  }
+
+  /////////////////////////////////////////////step #5
+  await newClient.updateOne({
+    $set: {
+      connectedSrv: ConnectedSrv._id,
+    },
+  });
+};
+
+//-------------сохранение данных в базу---------------------
+const createData = async (msg, log) => {
+  try {
+
+    /////////////////////////////////////////////step #1
+    let loginOk = {};
+    loginOk = await Login.findOne({ login: log.mail });
+    if (!!loginOk)
+      await ImageData.create({
+        clientId: loginOk.clientId,
+        name: JSON.stringify(msg.name),
+        comment: JSON.stringify(msg.comment),
+      });
+    let image_Data = {};
+    image_Data = await ImageData.findOne({ clientId: loginOk.clientId });
     console.log("data creation completed");
+
+    /////////////////////////////////////////////step #2
+    let newClient = {};
+    newClient = await clientOwner.findOne({ login: loginOk._id });
+    if (!newClient.imageData) {
+      await newClient.updateOne({
+        $set: {
+          imageData: image_Data._id,
+        },
+      });
+    }
   } catch (e) {
     console.log(e);
   }
@@ -41,10 +108,11 @@ const createData = async (msg) => {
 //-------------выборка данных из базы---------------------
 const readData = async (msg) => {
   try {
-    let imageDataObject = await ImageData.find({
+    let imageDataObject = {}
+    imageDataObject  = await ImageData.find({
       name: JSON.stringify(msg.name),
     });
-    // console.log('read data completed ', imageDataObject)
+    console.log("read data completed ");
     return imageDataObject;
   } catch (e) {
     console.log(e);
@@ -102,99 +170,8 @@ const checkRoleTelegram = async (source, ctx, Role) => {
       role = await Role.findOne({ idTelegram: ctx.from.id });
     }
   }
-  // console.log('save new client completed: ', role)
   return role;
 };
-
-//------------сохраняем в базе нового клиента + доп параметры------------------
-const createClient = async (log) => {
-  //step #1
-  let loginOk = {};
-  loginOk = await Login.findOne({ login: log.mail });
-  if (!loginOk) {
-    await Login.create({
-      login: log.mail,
-      password: log.password,
-    });
-    loginOk = await Login.findOne({ login: log.mail });
-  }
-
-  //step #2
-  let newClient = {};
-  newClient = await clientOwner.findOne({ login: loginOk._id });
-  if (!newClient) {
-    await clientOwner.create({
-      login: loginOk._id,
-    });
-    newClient = await clientOwner.findOne({ login: loginOk._id });
-  }
-
-  //step #3
-  let ConnectedSrv = {};
-  ConnectedSrv = await connectedSrv.findOne({ clientId: newClient._id });
-  if (!ConnectedSrv) {
-    await connectedSrv.create({
-      clientId: newClient._id,
-    });
-    ConnectedSrv = await connectedSrv.findOne({ clientId: newClient._id });
-
-    //step #4
-    let image_Data = {};
-    image_Data = await ImageData.findOne({ clientId: newClient._id });
-    if (!image_Data) {
-      await ImageData.create({
-        clientId: newClient._id,
-      });
-      image_Data = await ImageData.findOne({ clientId: newClient._id });
-
-      //step #5
-      await newClient.updateOne({
-        $push: {
-          connectedSrv: ConnectedSrv._id,
-          imageData: image_Data._id,
-        },
-      });
-    }
-  }
-};
-// const newClientLog = new login({login:log.login, password:log.password})
-// await login.save()
-//
-// const newConnectedSrv = new connectedSrv({})
-// await connectedSrv.save()
-//
-// const newClient = new clientId({})
-// await clientId.save()
-//
-// await newClient.updateOne({connectedSrv:newConnectedSrv._id})
-// await newClient.updateOne({login:newClientLog._id})
-// await newClient.updateOne({imageData:newImageData._id})
-//
-// await newClientLog.updateOne({clientId:newClient._id})
-// await newConnectedSrv.updateOne({clientId:newClient._id})
-// await newImageData.updateOne({clientId:newClient._id})
-//
-// }
-
-// const checkRoleClient = async (log, Role) => {
-//
-//     let role = {}
-//         role = await Role.findOne({mail:log})
-//         if(!role){
-//             await Role.create({
-//                 mail: log.mail,
-//                 password: log.password,
-//                 messengers:{
-//                     viber: 'null',
-//                     telegram: 'null',
-//                 },
-//                 state: 'default'
-//             })
-//             role = await Role.findOne({mail:log})
-//         }
-//     console.log('save new client completed: ', role)
-//     return role
-// }
 
 module.exports = {
   connect,

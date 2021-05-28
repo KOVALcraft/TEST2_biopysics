@@ -1,7 +1,8 @@
+const fields = require('../../databasefields')
 const {model, Schema, Types} = require('mongoose')
 
 const schema = new Schema({
-    owner:{type:Types.ObjectId, ref:'idOwner'},
+    owner:{type:Types.ObjectId, ref:fields.modelRoleClient},
     source: {type:String},
     idTelegram:{type:String,unique: true},
     profileTelegram: {
@@ -17,4 +18,4 @@ const schema = new Schema({
     dateOfSigned:{type:Date, default:Date.now}
 })
 
-module.exports = model('telegramClient', schema)
+module.exports = model(fields.modelRoleTelegramClient, schema)

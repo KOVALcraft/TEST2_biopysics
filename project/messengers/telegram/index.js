@@ -3,10 +3,11 @@ require("dotenv").config();
 const telegram = async () => {
   const { Telegraf } = require("telegraf");
 
-  const { clientOwner } = require("../../database/index").models.roles;
-  const { telegramClient } = require("../../database/index").models.roles;
-  const { connectedSrv } = require("../../database/index").models.elements;
-  const { Login } = require("../../database/index").models.elements;
+
+  const clientOwner = require('../../database/models/roles/Clients')
+  const telegramClient = require('../../database/models/roles/msgClientTg')
+  const connectedSrv = require('../../database/models/dataElements/connectedSrv')
+  const Login = require('../../database/models/dataElements/login')
   const { checkRoleTelegram } = require("../../database/index").methods;
 
   const TgBot = new Telegraf(process.env.TELEGRAM_CLIENT_BOT_TOKEN);
@@ -39,7 +40,7 @@ const telegram = async () => {
 
     switch (clientStatus) {
       case "added":
-        const mailOk = await Login.findOne({ mail: msg });
+        const mailOk = await Login.findOne({ login: msg });
         if (!!mailOk) {
           ctx.reply(
             "email 📩 confirmed!\n" +
@@ -65,9 +66,8 @@ const telegram = async () => {
               "now you can receive notifications 📲"
           );
           clientAdd.state.subscription = "PassOk";
-          const Owner = await clientOwner.findOne({ _id: passOk.clientId });
-          console.log(clientAdd)
           await clientAdd.save();
+          const Owner = await clientOwner.findOne({ _id: passOk.clientId });
           await connectedSrv.findOneAndUpdate(
             { clientId: Owner._id },
             { $push: { telegram: [clientAdd._id] } }

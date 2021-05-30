@@ -9,8 +9,8 @@ const {connect, createData, readData, createClient} = require('../database')
 
 const io = require('socket.io')(5000)
 
-const {Client} = require('../database/index').models.roles;
-const {telegramClient} = require('../database/index').models.roles
+const ClientVb = require('../database/models/roles/msgClient');
+const telegramClient = require('../database/models/roles/msgClientTg')
 
 
 const TextMessage = require('viber-bot').Message.Text
@@ -41,7 +41,7 @@ const start = async ()=>{
 
 				//-----------
 
-				const clients = await Client.find()
+				const clients = await ClientVb.find()
 				const clientsTg = await telegramClient.find()
 
 

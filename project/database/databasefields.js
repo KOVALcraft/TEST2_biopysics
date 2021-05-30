@@ -3,7 +3,8 @@ const databasefields = {
     modelDataImage: 'imageData',
     modelServicesClientServices: 'connectedSrv',
     modelDataLogin: 'login',
-    modelRoleTelegramClient: 'telegramClient'
+    modelRoleTelegramClient: 'telegramClient',
+    modelRoleViberClient: 'viberClient',
 }
 
 module.exports = databasefields

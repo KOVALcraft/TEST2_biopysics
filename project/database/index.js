@@ -1,6 +1,6 @@
 require("dotenv").config();
 const ImageData = require("../database/models/dataElements/imageData");
-const Client = require("../database/models/roles/msgClient");
+const ClientVb = require("../database/models/roles/msgClient");
 const telegramClient = require("../database/models/roles/msgClientTg");
 const clientOwner = require("../database/models/roles/Clients");
 const Login = require("./models/dataElements/login");
@@ -73,7 +73,7 @@ const createClient = async (log) => {
   });
 };
 
-//-------------сохранение данных в базу---------------------
+// -------------сохранение данных в базу---------------------
 const createData = async (msg, log) => {
   try {
 
@@ -184,7 +184,7 @@ module.exports = {
   },
   models: {
     roles: {
-      Client,
+      ClientVb,
       telegramClient,
       clientOwner,
     },

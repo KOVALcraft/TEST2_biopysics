@@ -51,7 +51,7 @@ const telegram = async () => {
           await clientAdd.save();
         } else {
           ctx.reply(
-            "sorry(( mail is not correct, try again or subscribe if not subscribed!"
+            "sorry 😞 mail is not correct, try again or subscribe if not subscribed!"
           );
         }
 
@@ -72,8 +72,13 @@ const telegram = async () => {
             { clientId: Owner._id },
             { $push: { telegram: [clientAdd._id] } }
           );
+          const Srv = await connectedSrv.findOne({ clientId: Owner._id });
+          await telegramClient.findOneAndUpdate(
+              { _id: clientAdd._id },
+              { $set: { connectedSrv: Srv._id } }
+          );
         } else {
-          ctx.reply("sorry(( password not correct, try again!");
+          ctx.reply("sorry 😞 password not correct, try again!");
         }
 
         break;

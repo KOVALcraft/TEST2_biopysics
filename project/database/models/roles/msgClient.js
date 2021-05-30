@@ -1,7 +1,8 @@
+const fields = require('../../databasefields')
 const {model, Schema, Types} = require('mongoose')
 
 const schema = new Schema({
-    owner:{type:Types.ObjectId, ref:'idOwner'},
+    connectedSrv:{type:Types.ObjectId, ref:fields.modelServicesClientServices},
     source: {type:String},
     idViber:{type:String,unique: true},
     profileViber: {
@@ -18,4 +19,4 @@ const schema = new Schema({
     dateOfSigned:{type:Date, default:Date.now}
 })
 
-module.exports = model('Client', schema)
+module.exports = model(fields.modelRoleViberClient, schema)

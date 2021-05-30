@@ -2,7 +2,7 @@ const fields = require('../../databasefields')
 const {model, Schema, Types} = require('mongoose')
 
 const schema = new Schema({
-    owner:{type:Types.ObjectId, ref:fields.modelRoleClient},
+    connectedSrv:{type:Types.ObjectId, ref:fields.modelServicesClientServices},
     source: {type:String},
     idTelegram:{type:String,unique: true},
     profileTelegram: {
